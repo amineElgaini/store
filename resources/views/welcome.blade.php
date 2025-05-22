@@ -15,7 +15,7 @@
                 Toggle Box
             </button>
             <div x-show="open" class="mt-4 p-4 bg-white border rounded">
-                Hello from Alpine.js!
+                Hello from Alpine.js! <a href="{{route('login')}}">Login</a> | <a href="{{route('register')}}">Register</a>
             </div>
         </div>
     </body>
