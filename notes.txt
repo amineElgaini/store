@@ -1,0 +1,47 @@
+user:
+- id
+- name
+- username
+- password
+- isAdmin
+
+categories:
+- id
+- name
+
+product:
+- id
+- name
+- image
+- description
+- price
+- stock
+- category_id
+
+package:
+- id
+- name
+- price
+
+package_detail:
+- id
+- package_id
+- product_id
+
+order:
+- id
+- user_id
+- total_price
+- status (pending, completed)
+
+order_product_items:
+- id
+- order_id
+- product_id
+- quantity
+
+order_package_items:
+- id
+- order_id
+- package_id
+- quantity
