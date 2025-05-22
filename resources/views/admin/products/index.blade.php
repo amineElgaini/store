@@ -17,6 +17,16 @@
                     {{ session('success') }}
                 </div>
             @endif
+            @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">
+                    <ul class="list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
   
             <table class="min-w-full border-collapse border border-gray-200">
                 <thead>
@@ -38,19 +48,19 @@
                         <!-- Thumbnail and modal -->
                         <td class="border border-gray-300 px-4 py-2">
                             @if($product->image)
-                              <img 
+                              {{-- <img 
                                 src="{{ asset('storage/' . $product->image) }}" 
                                 alt="{{ $product->name }}" 
                                 class="w-12 h-12 object-cover cursor-pointer rounded" 
                                 @click="open = true"
-                              />
-                              {{-- <img 
+                              /> --}}
+                              <img 
                                 src="{{ asset('storage/' . $product->image) }}" 
                                 alt="{{ $product->name }}" 
                                 class="w-12 h-12 object-cover cursor-pointer rounded" 
                                 style="height: 48px; min-height: 48px; max-height: 48px;"
                                 @click="open = true"
-                                /> --}}
+                                />
   
                               <!-- Modal -->
                               <div

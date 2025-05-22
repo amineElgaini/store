@@ -23,6 +23,9 @@
                             <x-nav-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')">
                                 {{ __('Products') }}
                             </x-nav-link>
+                            <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
+                                {{ __('Packages') }}
+                            </x-nav-link>
                         @endif
                     @endauth
                 </div>

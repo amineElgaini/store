@@ -77,15 +77,26 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
     }
 
-    // Delete product
     public function destroy(Product $product)
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+        $usedInPackages = $product->packageDetails()->exists();
+        $orderProductItems = $product->orderProductItems()->exists();
+    
+        if ($usedInPackages || $orderProductItems) {
+            return redirect()->route('admin.products.index')->withErrors([
+                "Cannot delete product [{$product->id}] ({$product->name}) because it exists in: packages or orders"
+            ]);
         }
-
+    
+        $imagePath = $product->image;
+    
         $product->delete();
-
+    
+        if ($imagePath) {
+            Storage::disk('public')->delete($imagePath);
+        }
+    
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
+    
 }
