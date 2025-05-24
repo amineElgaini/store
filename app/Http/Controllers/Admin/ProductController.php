@@ -61,6 +61,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'is_active' => 'nullable|boolean',
             'category_id' => 'required|exists:categories,id',
         ]);
 
@@ -84,17 +85,17 @@ class ProductController extends Controller
     
         if ($usedInPackages || $orderProductItems) {
             return redirect()->route('admin.products.index')->withErrors([
-                "Cannot delete product [{$product->id}] ({$product->name}) because it exists in: packages or orders"
+                "Cannot delete product already exists in: packages or orders"
             ]);
         }
     
-        $imagePath = $product->image;
+        // $imagePath = $product->image;
     
         $product->delete();
     
-        if ($imagePath) {
-            Storage::disk('public')->delete($imagePath);
-        }
+        // if ($imagePath) {
+        //     Storage::disk('public')->delete($imagePath);
+        // }
     
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }

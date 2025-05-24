@@ -13,21 +13,7 @@
                 Add Package
             </a>
 
-            @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if ($errors->any())
-                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">
-                    <ul class="list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
+            <x-flash-messages />
 
             <table class="min-w-full border-collapse border border-gray-200">
                 <thead>
@@ -35,6 +21,7 @@
                         <th class="border px-4 py-2">Id</th>
                         <th class="border px-4 py-2">Name</th>
                         <th class="border px-4 py-2">Price</th>
+                        <th class="border px-4 py-2">Status</th> <!-- New Status column -->
                         <th class="border px-4 py-2">Actions</th>
                     </tr>
                 </thead>
@@ -43,10 +30,17 @@
                     <tr x-data="{ open: false }">
                         <td class="border px-4 py-2">{{ $package->id }}</td>
                         <td class="border px-4 py-2">{{ $package->name }}</td>
-                        <td class="border px-4 py-2">${{ number_format($package->price, 2) }}</td>
+                        <td class="border px-4 py-2">{{ number_format($package->price, 2) }} DH</td>
+                        <td class="border px-4 py-2">
+                            @if($package->is_active)
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">Active</span>
+                            @else
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">Inactive</span>
+                            @endif
+                        </td>
                         <td class="border px-4 py-2 space-x-2">
                             <button @click="open = true"
-                            class="text-blue-600 hover:text-blue-800">
+                                class="text-blue-600 hover:text-blue-800">
                                 More
                             </button>
                             <a href="{{ route('admin.packages.edit', $package) }}" class="text-yellow-600 hover:text-yellow-800">Edit</a>
@@ -63,9 +57,11 @@
                                 style="background-color: rgba(0,0,0,0.5);"
                                 class="fixed inset-0 flex items-center justify-center z-50"
                                 @keydown.escape.window="open = false"
-                                @click.away="open = false"
                             >
-                                <div class="bg-white rounded shadow-lg p-6 max-w-lg max-h-[80vh] overflow-auto">
+                                <div
+                                    class="bg-white rounded shadow-lg p-6 max-w-lg max-h-[80vh] overflow-auto"
+                                    @click.away="open = false"
+                                >
                                     <h3 class="text-lg font-semibold mb-4">Products in Package: {{ $package->name }}</h3>
 
                                     <ul>
@@ -84,14 +80,14 @@
                                                     @endif
                                                     <span>{{ $detail->product->name }}</span>
                                                 </div>
-                                                <span class="font-semibold">${{ number_format($detail->product->price, 2) }}</span>
+                                                <span class="font-semibold">{{ number_format($detail->product->price, 2) }} DH</span>
                                             </li>
                                         @endforeach
                                     </ul>
 
                                     <!-- Package Price -->
                                     <div class="mt-4 pt-3 text-right text-lg font-bold">
-                                        Total Package Price: ${{ number_format($package->price, 2) }}
+                                        Total Package Price: {{ number_format($package->price, 2) }} DH
                                     </div>
 
                                     <div class="text-right mt-4">

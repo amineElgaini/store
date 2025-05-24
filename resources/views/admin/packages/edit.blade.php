@@ -4,8 +4,17 @@
             {{ __('Edit Package') }}
         </h2>
     </x-slot>
-
+    
     <div class="py-12 max-w-4xl mx-auto sm:px-6 lg:px-8">
+        @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">
+                <ul class="list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="bg-white shadow-sm sm:rounded-lg p-6">
             <form method="POST" action="{{ route('admin.packages.update', $package) }}">
                 @csrf
@@ -27,17 +36,18 @@
                     @error('price') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
-                {{-- <div class="mb-4">
-                    <label class="block font-medium text-sm text-gray-700">Select Products</label>
-                    <select name="product_ids[]" multiple class="form-select w-full rounded-md shadow-sm">
-                        @foreach($products as $product)
-                            <option value="{{ $product->id }}" {{ in_array($product->id, $package->packageDetails->pluck('product_id')->toArray()) ? 'selected' : '' }}>
-                                {{ $product->name }}
-                            </option>
-                        @endforeach
-                    </select>                    
-                    @error('product_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div> --}}
+                <div class="mb-4 flex items-center space-x-2">
+                    <input 
+                        type="checkbox" 
+                        name="is_active" 
+                        id="is_active"
+                        value="1"
+                        {{ old('is_active', $package->is_active) ? 'checked' : '' }}
+                        class="form-checkbox h-5 w-5 text-blue-600"
+                    />
+                    <label for="is_active" class="font-medium text-sm text-gray-700">Is Active</label>
+                </div>
+                @error('is_active') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
                 <div class="mb-4">
                     <label class="block font-medium text-sm text-gray-700 mb-2">Select Products</label>
@@ -71,7 +81,6 @@
                     @error('product_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 
-
                 <div class="flex items-center gap-4">
                     <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" type="submit">
                         Save

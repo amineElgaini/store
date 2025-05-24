@@ -67,6 +67,22 @@
                   @error('category_id') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
               </div>
 
+            <div class="mb-6">
+                <label class="inline-flex items-center">
+                    <input 
+                      type="checkbox" 
+                      name="is_active" 
+                      value="1" 
+                      {{ old('is_active', $product->is_active) ? 'checked' : '' }} 
+                      class="form-checkbox h-5 w-5 text-indigo-600"
+                    >
+                    <span class="ml-2 text-gray-700">Active</span>
+                </label>
+                @error('is_active')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
               <div class="flex items-center gap-4">
                   <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                       Update

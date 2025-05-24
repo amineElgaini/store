@@ -41,24 +41,24 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|unique:categories,name,' . $category->id . '|max:255',
+            'is_active' => 'nullable|boolean',
         ]);
-
+    
         $category->update([
             'name' => $request->name,
+            'is_active' => $request->has('is_active') ? true : false,
         ]);
-
+    
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
     }
+    
 
     public function destroy(Category $category)
     {
-        $count = $category->products()->count();
-        if ($count > 0) {
+        if ($category->products()->exists()) {
             return back()->withErrors("Cannot delete category with existing products. [{$count}] Products use that category");
         }
+        $category->delete();
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
-
-        // $category->delete();
-        // return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
     }
 }

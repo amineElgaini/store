@@ -13,27 +13,14 @@
                 Add Category
             </a>
 
-            @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if ($errors->any())
-                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">
-                    <ul class="list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            <x-flash-messages />
 
             <table class="min-w-full border-collapse border border-gray-200">
                 <thead>
                     <tr>
                         <th class="border px-4 py-2">ID</th>
                         <th class="border px-4 py-2">Name</th>
+                        <th class="border px-4 py-2">Status</th>
                         <th class="border px-4 py-2">Actions</th>
                     </tr>
                 </thead>
@@ -42,6 +29,13 @@
                         <tr>
                             <td class="border px-4 py-2">{{ $category->id }}</td>
                             <td class="border px-4 py-2">{{ $category->name }}</td>
+                            <td class="border px-4 py-2">
+                                @if($category->is_active)
+                                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-800">Active</span>
+                                @else
+                                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-800">Inactive</span>
+                                @endif
+                            </td>
                             <td class="border px-4 py-2 space-x-2">
                                 <a href="{{ route('admin.categories.edit', $category) }}" class="text-yellow-600 hover:text-yellow-800">Edit</a>
 

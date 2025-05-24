@@ -26,6 +26,9 @@
                             <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                                 {{ __('Packages') }}
                             </x-nav-link>
+                            <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
+                                {{ __('Orders') }}
+                            </x-nav-link>
                         @endif
                     @endauth
                 </div>
@@ -83,6 +86,15 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')">
+                {{ __('Products') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
+                {{ __('Packages') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
+                {{ __('Orders') }}
             </x-responsive-nav-link>
         </div>
 

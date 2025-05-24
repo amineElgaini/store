@@ -59,17 +59,24 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
+        // Prevent update if package is used in any order
+        // if ($package->orderPackageItems()->exists()) {
+        //     return redirect()->back()->withErrors(["Cannot update: This package is already used in an order."]);
+        // }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'exists:products,id',
+            'is_active' => 'nullable|boolean',
         ]);
 
         // Update package
         $package->update([
             'name' => $request->name,
             'price' => $request->price,
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : false,
         ]);
 
         // Sync package details (products)
@@ -96,10 +103,10 @@ class PackageController extends Controller
 
     public function destroy(Package $package)
     {
-        if ($package->orderPackageItems()->exists()) {
-            $message = "Cannot delete package [{$package->id}] ({$package->name}) because it is used in one or more orders.";
-            return redirect()->route('admin.packages.index')->withErrors([$message]);
-        }
+        // if ($package->orderPackageItems()->exists()) {
+        //     $message = "Cannot delete package [{$package->id}] ({$package->name}) because it is used in one or more orders.";
+        //     return redirect()->route('admin.packages.index')->withErrors([$message]);
+        // }
     
         $package->delete();
     
