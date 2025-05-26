@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_product_items', function (Blueprint $table) {
+        Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->onDelete('restrict');
             $table->foreignId('product_id')->constrained()->onDelete('restrict');
-            // $table->foreignId('variant_id')->constrained()->onDelete('restrict');
-            $table->integer('quantity')->unsigned();
+            $table->foreignId('size_id')->constrained()->onDelete('restrict');
+            $table->foreignId('color_id')->constrained()->onDelete('restrict');
+            // $table->decimal('price', 10, 2); // if price varies by variant
+            $table->integer('stock')->default(0);
             $table->timestamps();
+
+            $table->unique(['product_id', 'size_id', 'color_id']); // no duplicate variants
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_product_items');
+        Schema::dropIfExists('product_variants');
     }
 };

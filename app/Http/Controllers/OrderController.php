@@ -16,8 +16,6 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        // $order->load(['user', 'productItems.product', 'packageItems.package']);
-        
         $order->load([
             'user',
             'productItems.product',
@@ -28,82 +26,79 @@ class OrderController extends Controller
 
 
     public function edit(Order $order)
-{
-    return view('admin.orders.edit', compact('order'));
-}
-
+    {
+        return view('admin.orders.edit', compact('order'));
+    }
 
     public function update(Request $request, Order $order)
     {
         $request->validate([
             'status' => 'required|in:pending,completed,cancelled',
         ]);
-    
+
         $newStatus = $request->status;
         $oldStatus = $order->status;
-    
-        // No change
+
         if ($newStatus === $oldStatus) {
             return back()->with('info', 'Order status is already ' . $newStatus);
         }
-    
+
+        $order->load('productItems.product', 'packageItems.package.packageDetails.product');
+
         DB::beginTransaction();
-    
+        // lock is optional cause quantity constraints
+
         try {
-            // If changing from cancelled to pending/completed
-            if ($oldStatus === 'cancelled' && in_array($newStatus, ['pending', 'completed'])) {
-                foreach ($order->productItems as $item) {
-                    if ($item->product->stock < $item->quantity) {
-                        DB::rollBack();
-                        return back()->withErrors("Not enough stock for product {$item->product->name}.");
+            if ($oldStatus === 'cancelled') {
+                // Validate stock availability
+                foreach ($order->productItems as $productItem) {
+                    if ($productItem->product->stock < $productItem->quantity) {
+                        throw new \Exception("Not enough stock for product {$productItem->product->name}.");
                     }
                 }
-    
-                foreach ($order->packageItems as $item) {
-                    foreach ($item->package->packageDetails as $detail) {
-                        if ($detail->product->stock < $item->quantity) {
-                            DB::rollBack();
-                            return back()->withErrors("Not enough stock for package product {$detail->product->name}.");
+
+                foreach ($order->packageItems as $packageItem) {
+                    foreach ($packageItem->package->packageDetails as $detail) {
+                        $required = $packageItem->quantity * $detail->quantity;
+                        if ($detail->product->stock < $required) {
+                            throw new \Exception("Not enough stock for package product {$detail->product->name}.");
                         }
                     }
                 }
-    
+
                 // Deduct stock
-                foreach ($order->productItems as $item) {
-                    $item->product->decrement('stock', $item->quantity);
+                foreach ($order->productItems as $productItem) {
+                    $productItem->product->decrement('stock', $productItem->quantity);
                 }
-    
-                foreach ($order->packageItems as $item) {
-                    foreach ($item->package->packageDetails as $detail) {
-                        $detail->product->decrement('stock', $item->quantity);
+
+                foreach ($order->packageItems as $packageItem) {
+                    foreach ($packageItem->package->packageDetails as $detail) {
+                        $detail->product->decrement('stock', $packageItem->quantity * $detail->quantity);
                     }
                 }
             }
-    
-            // If changing to cancelled
-            if ($newStatus === 'cancelled' && in_array($oldStatus, ['pending', 'completed'])) {
-                foreach ($order->productItems as $item) {
-                    $item->product->increment('stock', $item->quantity);
+
+            if ($newStatus === 'cancelled') {
+                foreach ($order->productItems as $productItem) {
+                    $productItem->product->increment('stock', $productItem->quantity);
                 }
-    
-                foreach ($order->packageItems as $item) {
-                    foreach ($item->package->packageDetails as $detail) {
-                        $detail->product->increment('stock', $item->quantity);
+
+                foreach ($order->packageItems as $packageItem) {
+                    foreach ($packageItem->package->packageDetails as $detail) {
+                        $detail->product->increment('stock', $packageItem->quantity * $detail->quantity);
                     }
                 }
             }
-    
-            // Update order status
+
             $order->update(['status' => $newStatus]);
-    
+
             DB::commit();
-    
+
             return back()->with('success', "Order #{$order->id} status updated to {$newStatus}.");
-    
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors('An error occurred while updating the order: ' . $e->getMessage());
         }
-    }    
+    }
 
 }

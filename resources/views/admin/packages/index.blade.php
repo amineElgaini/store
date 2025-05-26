@@ -38,19 +38,95 @@
                                 <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">Inactive</span>
                             @endif
                         </td>
-                        <td class="border px-4 py-2 space-x-2">
-                            <button @click="open = true"
-                                class="text-blue-600 hover:text-blue-800">
-                                More
-                            </button>
-                            <a href="{{ route('admin.packages.edit', $package) }}" class="text-yellow-600 hover:text-yellow-800">Edit</a>
-
-                            <form method="POST" action="{{ route('admin.packages.destroy', $package) }}" class="inline" onsubmit="return confirm('Delete this package?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
-                            </form>
-
+                        
+                        <td class="border px-4 py-2 space-x-2" x-data="{ open: false, editOpen: false, deleteOpen: false }">
+                            <!-- View More Button -->
+                            <button @click="open = true" class="text-blue-600 hover:text-blue-800 text-sm underline">More</button>
+                        
+                            <!-- Edit Button -->
+                            <button @click="editOpen = true" class="text-yellow-600 hover:text-yellow-800 text-sm underline">Edit</button>
+                        
+                            <!-- Delete Button -->
+                            <button @click="deleteOpen = true" class="text-red-600 hover:text-red-800 text-sm underline">Delete</button>
+                        
+                            <!-- Delete Modal -->
+                            <div
+                                x-show="deleteOpen"
+                                x-transition.opacity
+                                style="background-color: rgba(0,0,0,0.5);"
+                                class="fixed inset-0 flex items-center justify-center z-50"
+                                @keydown.escape.window="deleteOpen = false"
+                            >
+                                <div class="bg-white rounded shadow-lg p-6 max-w-sm w-full" @click.away="deleteOpen = false">
+                                    <h3 class="text-lg font-semibold mb-4">Delete Package</h3>
+                                    <p class="mb-4 text-sm text-gray-700">
+                                        Are you sure you want to delete the package <strong>{{ $package->name }}</strong>?
+                                    </p>
+                                    <div class="flex justify-end space-x-2">
+                                        <form method="POST" action="{{ route('admin.packages.destroy', $package) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                                Delete
+                                            </button>
+                                        </form>
+                                        <button @click="deleteOpen = false" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <!-- Edit Modal -->
+                            <div
+                                x-show="editOpen"
+                                x-transition.opacity
+                                style="background-color: rgba(0,0,0,0.5);"
+                                class="fixed inset-0 flex items-center justify-center z-50"
+                                @keydown.escape.window="editOpen = false"
+                            >
+                                <div
+                                    class="bg-white rounded shadow-lg p-6 max-w-md w-full"
+                                    @click.away="editOpen = false"
+                                >
+                                    <h3 class="text-lg font-semibold mb-4">Edit Package: {{ $package->name }}</h3>
+                        
+                                    <form method="POST" action="{{ route('admin.packages.update', $package) }}" class="space-y-4">
+                                        @csrf
+                                        @method('PATCH')
+                        
+                                        <!-- Price -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Price (DH)</label>
+                                            <input type="number" step="0.01" min="0" name="price"
+                                                value="{{ $package->price }}"
+                                                class="mt-1 w-full border rounded px-3 py-2 text-sm" required />
+                                        </div>
+                        
+                                        <!-- Status -->
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" id="is_active-{{ $package->id }}" name="is_active" value="1"
+                                                {{ $package->is_active ? 'checked' : '' }}
+                                                class="border-gray-300 rounded">
+                                            <label for="is_active-{{ $package->id }}" class="text-sm">Active</label>
+                                        </div>
+                        
+                                        <div class="text-right">
+                                            <button type="submit"
+                                                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                Save
+                                            </button>
+                                            <button type="button"
+                                                    @click="editOpen = false"
+                                                    class="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        
+                            <!-- Details Modal -->
                             <div
                                 x-show="open"
                                 x-transition.opacity
@@ -63,33 +139,36 @@
                                     @click.away="open = false"
                                 >
                                     <h3 class="text-lg font-semibold mb-4">Products in Package: {{ $package->name }}</h3>
-
+                        
                                     <ul>
                                         @foreach($package->packageDetails as $detail)
-                                            <li class="flex items-center justify-between border-b py-2">
+                                            <li class="flex justify-between items-end gap-2 border-b py-2">
                                                 <div class="flex items-center space-x-3">
                                                     @if($detail->product->image)
                                                         <img src="{{ asset('storage/' . $detail->product->image) }}"
-                                                            alt="{{ $detail->product->name }}"
-                                                            class="w-10 h-10 object-cover rounded"
-                                                        />
+                                                             alt="{{ $detail->product->name }}"
+                                                             class="w-10 h-10 object-cover rounded" />
                                                     @else
                                                         <div class="w-10 h-10 bg-gray-200 flex items-center justify-center rounded text-gray-400 text-xs italic">
                                                             No Image
                                                         </div>
                                                     @endif
-                                                    <span>{{ $detail->product->name }}</span>
+                                                    <div>
+                                                        <div class="font-semibold">{{ $detail->product->name }}</div>
+                                                        <div class="text-sm text-gray-600">Quantity: {{ $detail->quantity }}</div>
+                                                    </div>
                                                 </div>
-                                                <span class="font-semibold">{{ number_format($detail->product->price, 2) }} DH</span>
+                                                <div class="text-right">
+                                                    <span class="font-semibold">{{ number_format($detail->product->price, 2) }} DH</span>
+                                                </div>
                                             </li>
                                         @endforeach
                                     </ul>
-
-                                    <!-- Package Price -->
+                        
                                     <div class="mt-4 pt-3 text-right text-lg font-bold">
                                         Total Package Price: {{ number_format($package->price, 2) }} DH
                                     </div>
-
+                        
                                     <div class="text-right mt-4">
                                         <button @click="open = false"
                                                 class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
@@ -98,8 +177,9 @@
                                     </div>
                                 </div>
                             </div>
-
                         </td>
+                        
+                        
                     </tr>
                     @endforeach
                 </tbody>

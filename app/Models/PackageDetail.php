@@ -10,7 +10,7 @@ class PackageDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['package_id', 'product_id'];
+    protected $fillable = ['package_id', 'product_id', 'quantity'];
 
     public function package(): BelongsTo
     {

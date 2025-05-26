@@ -21,6 +21,7 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
+        // you need a lock here
         $request->validate([
             'name' => 'required|string|unique:categories,name|max:255',
         ]);
@@ -39,26 +40,27 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
+        // use lock here
         $request->validate([
             'name' => 'required|string|unique:categories,name,' . $category->id . '|max:255',
             'is_active' => 'nullable|boolean',
         ]);
-    
+
         $category->update([
             'name' => $request->name,
             'is_active' => $request->has('is_active') ? true : false,
         ]);
-    
+
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
     }
-    
 
     public function destroy(Category $category)
     {
-        if ($category->products()->exists()) {
-            return back()->withErrors("Cannot delete category with existing products. [{$count}] Products use that category");
+        // use a lock here
+        if (!$category->products()->exists() && $category->delete()) {
+            return back()->with('success', 'Category deleted successfully.');
         }
-        $category->delete();
-        return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
+
+        return back()->withErrors("Cannot delete category with existing products.");        
     }
 }

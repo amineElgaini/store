@@ -42,45 +42,82 @@
                         @endif
                       </td>
                       
-                      <td class="border border-gray-300 px-4 py-2 space-x-2 flex flex-wrap gap-2">
-                        <div x-data="{ open: false }">
-                          <button @click="open = true" class="text-blue-600">View</button>
-                          <div
-                            x-show="open"
-                            x-transition.opacity
-                            style="background-color: rgba(0,0,0,0.5);"
-                            class="fixed inset-0 flex items-center justify-center z-50"
-                            @keydown.escape.window="open = false"
-                          >
-                            <div
-                              class="bg-white rounded shadow-lg p-6 max-w-lg max-h-[80vh] overflow-auto"
-                              @click.away="open = false"
-                            >
-                              <h3 class="text-lg font-semibold mb-4">{{ $product->name }} Details</h3>
-                              
-                              @if($product->image)
-                                  <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="max-w-full max-h-48 rounded mb-4 mx-auto" />
-                              @else
-                                  <div class="w-full h-48 bg-gray-200 flex items-center justify-center rounded mb-4 text-gray-400 italic">
-                                      No Image Available
-                                  </div>
-                              @endif
+                      <td class="border border-gray-300 px-4 py-2 space-x-2 flex flex-wrap gap-2"
+    x-data="{ viewOpen: false, deleteOpen: false }">
+
+    <!-- View Button -->
+    <button @click="viewOpen = true" class="text-blue-600 hover:text-blue-800 text-sm underline">View</button>
+
+    <!-- View Modal -->
+    <div
+        x-show="viewOpen"
+        x-transition.opacity
+        style="background-color: rgba(0,0,0,0.5);"
+        class="fixed inset-0 flex items-center justify-center z-50"
+        @keydown.escape.window="viewOpen = false"
+    >
+        <div class="bg-white rounded shadow-lg p-6 max-w-lg max-h-[80vh] overflow-auto" @click.away="viewOpen = false">
+            <h3 class="text-lg font-semibold mb-4">{{ $product->name }} Details</h3>
+
+            @if($product->image)
+                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                     class="max-w-full max-h-48 rounded mb-4 mx-auto" />
+            @else
+                <div class="w-full h-48 bg-gray-200 flex items-center justify-center rounded mb-4 text-gray-400 italic">
+                    No Image Available
+                </div>
+            @endif
+
+            <p class="whitespace-pre-wrap">{{ $product->description ?? 'No description available.' }}</p>
+
+            <button @click="viewOpen = false"
+                    class="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Edit Button -->
+    <a href="{{ route('admin.products.edit', $product) }}"
+       class="text-yellow-600 hover:text-yellow-800 text-sm underline">Edit</a>
+
+    <!-- Delete Button -->
+    <button @click="deleteOpen = true"
+            class="text-red-600 hover:text-red-800 text-sm underline">Delete</button>
+
+    <!-- Delete Modal -->
+    <div
+        x-show="deleteOpen"
+        x-transition.opacity
+        style="background-color: rgba(0,0,0,0.5);"
+        class="fixed inset-0 flex items-center justify-center z-50"
+        @keydown.escape.window="deleteOpen = false"
+    >
+        <div class="bg-white rounded shadow-lg p-6 max-w-sm w-full" @click.away="deleteOpen = false">
+            <h3 class="text-lg font-semibold mb-4 text-red-700">Delete Product</h3>
+            <p>Are you sure you want to delete <strong>{{ $product->name }}</strong>?</p>
+            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="mt-4">
+                @csrf
+                @method('DELETE')
+                <div class="text-right">
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                        Confirm
+                    </button>
+                    <button type="button"
+                            @click="deleteOpen = false"
+                            class="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</td>
+
+
                       
-                              <p class="whitespace-pre-wrap">{{ $product->description ?? 'No description available.' }}</p>
-                      
-                              <button @click="open = false" class="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-                                Close
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                          <a href="{{ route('admin.products.edit', $product) }}" class="text-yellow-600 hover:text-yellow-800">Edit</a>
-                          <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="inline" onsubmit="return confirm('Delete this product?')">
-                              @csrf
-                              @method('DELETE')
-                              <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
-                          </form>
-                      </td>
                   </tr>
                   @endforeach
               </tbody>

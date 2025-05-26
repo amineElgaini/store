@@ -10,14 +10,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    // List products with pagination
     public function index()
     {
         $products = Product::with('category')->paginate(10);
         return view('admin.products.index', compact('products'));
     }
 
-    // Show create form
     public function create()
     {
         $categories = Category::all();
@@ -27,6 +25,7 @@ class ProductController extends Controller
     // Store new product
     public function store(Request $request)
     {
+        // you need a lock here
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|max:2048',
@@ -45,16 +44,15 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
 
-    // Show edit form
     public function edit(Product $product)
     {
         $categories = Category::all();
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    // Update product
     public function update(Request $request, Product $product)
     {
+        // you need a lock here
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|max:2048',
@@ -80,6 +78,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        // you need to lock product table.
         $usedInPackages = $product->packageDetails()->exists();
         $orderProductItems = $product->orderProductItems()->exists();
     
@@ -89,15 +88,14 @@ class ProductController extends Controller
             ]);
         }
     
-        // $imagePath = $product->image;
+        $imagePath = $product->image;
     
         $product->delete();
     
-        // if ($imagePath) {
-        //     Storage::disk('public')->delete($imagePath);
-        // }
-    
+        if ($imagePath) {
+            Storage::disk('public')->delete($imagePath);
+        }
+
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
-    
 }

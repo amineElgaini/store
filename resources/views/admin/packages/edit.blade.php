@@ -56,27 +56,46 @@
                             $selectedProductIds = $package->packageDetails->pluck('product_id')->toArray();
                         @endphp
                         @foreach($products as $product)
-                            <label class="flex items-center space-x-3 border rounded p-2 cursor-pointer hover:bg-gray-50">
-                                <input
-                                    type="checkbox"
-                                    name="product_ids[]"
-                                    value="{{ $product->id }}"
-                                    class="form-checkbox h-5 w-5 text-blue-600"
-                                    {{ in_array($product->id, old('product_ids', $selectedProductIds)) ? 'checked' : '' }}
-                                />
-                                @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-12 h-12 object-cover rounded" />
-                                @else
-                                    <div class="w-12 h-12 bg-gray-200 flex items-center justify-center rounded text-gray-400 text-xs italic">
-                                        No Image
-                                    </div>
-                                @endif
-                                <div>
-                                    <div class="font-medium">{{ $product->name }}</div>
-                                    <div class="text-sm text-gray-600">${{ number_format($product->price, 2) }}</div>
+                        @php
+                            $isChecked = in_array($product->id, old('product_ids', $selectedProductIds));
+                            $oldQuantities = old('quantities', $productQuantities ?? []);
+                            $quantityValue = $oldQuantities[$product->id] ?? 1;
+                        @endphp
+                    
+                        <label class="flex items-start space-x-3 border rounded p-2 cursor-pointer hover:bg-gray-50">
+                            <input
+                                type="checkbox"
+                                name="product_ids[]"
+                                value="{{ $product->id }}"
+                                class="form-checkbox h-5 w-5 text-blue-600 mt-2"
+                                {{ $isChecked ? 'checked' : '' }}
+                            />
+                    
+                            @if($product->image)
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-12 h-12 object-cover rounded" />
+                            @else
+                                <div class="w-12 h-12 bg-gray-200 flex items-center justify-center rounded text-gray-400 text-xs italic">
+                                    No Image
                                 </div>
-                            </label>
-                        @endforeach
+                            @endif
+                    
+                            <div class="flex-1">
+                                <div class="font-medium">{{ $product->name }}</div>
+                                <div class="text-sm text-gray-600">${{ number_format($product->price, 2) }}</div>
+                                <div class="mt-2">
+                                    <label class="text-sm text-gray-700">Quantity:</label>
+                                    <input
+                                        type="number"
+                                        name="quantities[{{ $product->id }}]"
+                                        value="{{ $quantityValue }}"
+                                        min="1"
+                                        class="form-input w-20 mt-1 rounded-md shadow-sm"
+                                    />
+                                </div>
+                            </div>
+                        </label>
+                    @endforeach
+                    
                     </div>
                     @error('product_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>

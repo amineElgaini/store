@@ -19,8 +19,6 @@ class PackageController extends Controller
 
     public function create()
     {
-        // You might want to let admin select multiple products to add to package details
-        // So pass all products for selection
         $products = Product::all();
         return view('admin.packages.create', compact('products'));
     }
@@ -32,9 +30,10 @@ class PackageController extends Controller
             'price' => 'required|numeric|min:0',
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'exists:products,id',
+            'quantities' => 'required|array',
+            'quantities.*' => 'required|integer|min:1',
         ]);
 
-        // Create package
         $package = Package::create([
             'name' => $request->name,
             'price' => $request->price,
@@ -42,58 +41,77 @@ class PackageController extends Controller
 
         // Create package details for each product
         foreach ($request->product_ids as $productId) {
-            $package->packageDetails()->create(['product_id' => $productId]);
+            $quantity = $request->quantities[$productId] ?? 1;
+
+            $package->packageDetails()->create([
+                'product_id' => $productId,
+                'quantity' => $quantity,
+            ]);
         }
 
         return redirect()->route('admin.packages.index')->with('success', 'Package created with products.');
     }
 
-    public function edit(Package $package)
+/*     public function edit(Package $package)
     {
+        if ($package->orderPackageItems()->exists()) {
+            return redirect()->back()->withErrors(["Cannot update: This package is already used in an order."]);
+        }
+        
         $products = Product::all();
-        // get product_ids assigned to this package for pre-selecting
         $selectedProductIds = $package->packageDetails->pluck('product_id')->toArray();
 
-        return view('admin.packages.edit', compact('package', 'products', 'selectedProductIds'));
+        $productQuantities = $package->packageDetails->pluck('quantity', 'product_id')->toArray();
+
+        return view('admin.packages.edit', compact('package', 'products', 'selectedProductIds', 'productQuantities'));
     }
 
     public function update(Request $request, Package $package)
     {
-        // Prevent update if package is used in any order
-        // if ($package->orderPackageItems()->exists()) {
-        //     return redirect()->back()->withErrors(["Cannot update: This package is already used in an order."]);
-        // }
-
+        if ($package->orderPackageItems()->exists()) {
+            return redirect()->back()->withErrors(["Cannot update: This package is already used in an order."]);
+        }
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'exists:products,id',
+            'quantities' => 'required|array',
+            'quantities.*' => 'required|integer|min:1',
             'is_active' => 'nullable|boolean',
         ]);
 
-        // Update package
+
+    
         $package->update([
             'name' => $request->name,
             'price' => $request->price,
             'is_active' => $request->has('is_active') ? $request->boolean('is_active') : false,
         ]);
-
-        // Sync package details (products)
-        // Remove existing details not in new list and add new ones
+    
+        // Delete removed products
         $package->packageDetails()->whereNotIn('product_id', $request->product_ids)->delete();
-
-        $existingProductIds = $package->packageDetails->pluck('product_id')->toArray();
-
-        // Add new details for product_ids that don't exist yet
+    
+        $existingDetails = $package->packageDetails->keyBy('product_id');
+    
         foreach ($request->product_ids as $productId) {
-            if (!in_array($productId, $existingProductIds)) {
-                $package->packageDetails()->create(['product_id' => $productId]);
+            $quantity = $request->quantities[$productId] ?? 1;
+    
+            if ($existingDetails->has($productId)) {
+                // Update existing
+                $existingDetails[$productId]->update(['quantity' => $quantity]);
+            } else {
+                // Create new
+                $package->packageDetails()->create([
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                ]);
             }
         }
-
-        return redirect()->route('admin.packages.index')->with('success', 'Package updated with products.');
-    }
+    
+        return redirect()->route('admin.packages.index')->with('success', 'Package updated with products and quantities.');
+    } */
 
     public function show(Package $package)
     {
@@ -101,13 +119,28 @@ class PackageController extends Controller
         return view('admin.packages.show', compact('package'));
     }
 
+    public function update(Request $request, Package $package)
+    {
+        $request->validate([
+            'price' => 'required|numeric|min:0',
+            'is_active' => 'nullable|boolean',
+        ]);
+    
+        $package->update([
+            'price' => $request->price,
+            'is_active' => $request->has('is_active') ? 1 : 0,
+        ]);
+    
+        return redirect()->route('admin.packages.index')->with('success', 'Package updated.');
+    }
+
     public function destroy(Package $package)
     {
-        // if ($package->orderPackageItems()->exists()) {
-        //     $message = "Cannot delete package [{$package->id}] ({$package->name}) because it is used in one or more orders.";
-        //     return redirect()->route('admin.packages.index')->withErrors([$message]);
-        // }
-    
+        if ($package->orderPackageItems()->exists()) {
+            return redirect()
+                ->route('admin.packages.index')
+                ->withErrors([ 'Cannot delete package because it is part of an existing order.']);
+        }
         $package->delete();
     
         return redirect()->route('admin.packages.index')->with('success', 'Package deleted.');

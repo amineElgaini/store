@@ -28,14 +28,15 @@
                     <label class="block font-medium text-sm text-gray-700 mb-2">Select Products</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-64 overflow-auto border rounded p-2">
                         @foreach($products as $product)
-                            <label class="flex items-center space-x-3 border rounded p-2 cursor-pointer hover:bg-gray-50">
+                            <label class="flex items-start space-x-3 border rounded p-2 cursor-pointer hover:bg-gray-50">
                                 <input
                                     type="checkbox"
                                     name="product_ids[]"
                                     value="{{ $product->id }}"
-                                    class="form-checkbox h-5 w-5 text-blue-600"
+                                    class="form-checkbox h-5 w-5 text-blue-600 mt-2"
                                     @if(is_array(old('product_ids')) && in_array($product->id, old('product_ids'))) checked @endif
                                 />
+
                                 @if($product->image)
                                     <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-12 h-12 object-cover rounded" />
                                 @else
@@ -43,12 +44,24 @@
                                         No Image
                                     </div>
                                 @endif
-                                <div>
+
+                                <div class="flex-1">
                                     <div class="font-medium">{{ $product->name }}</div>
                                     <div class="text-sm text-gray-600">${{ number_format($product->price, 2) }}</div>
+                                    <div class="mt-2">
+                                        <label class="text-sm text-gray-700">Quantity:</label>
+                                        <input
+                                            type="number"
+                                            name="quantities[{{ $product->id }}]"
+                                            value="{{ old('quantities.' . $product->id, 1) }}"
+                                            min="1"
+                                            class="form-input w-20 mt-1 rounded-md shadow-sm"
+                                        />
+                                    </div>
                                 </div>
                             </label>
                         @endforeach
+
                     </div>
                     @error('product_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>

@@ -101,7 +101,7 @@
                                       <ul class="pl-4 space-y-1 list-disc text-sm text-gray-600">
                                           @foreach($item->package->packageDetails as $detail)
                                               <li>
-                                                  {{ $detail->product->name ?? 'Deleted Product' }} — Id: {{ $detail->product->id }} — Qty: {{ $detail->quantity ?? 1 }}
+                                                  {{ $detail->product->name ?? 'Deleted Product' }} — Id: {{ $detail->product->id }} — Qty: {{ $detail->quantity}}
                                               </li>
                                           @endforeach
                                       </ul>
