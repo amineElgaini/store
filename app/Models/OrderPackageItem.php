@@ -21,4 +21,10 @@ class OrderPackageItem extends Model
     {
         return $this->belongsTo(Package::class);
     }
+
+    public function packageVariantItems()
+    {
+        return $this->hasMany(OrderPackageVariantItem::class);
+    }
+
 }

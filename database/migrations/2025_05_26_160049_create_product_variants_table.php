@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('size_id')->constrained()->onDelete('restrict');
             $table->foreignId('color_id')->constrained()->onDelete('restrict');
             // $table->decimal('price', 10, 2); // if price varies by variant
-            $table->integer('stock')->default(0);
+            $table->unsignedInteger('stock')->default(0);
             $table->timestamps();
 
             $table->unique(['product_id', 'size_id', 'color_id']); // no duplicate variants
