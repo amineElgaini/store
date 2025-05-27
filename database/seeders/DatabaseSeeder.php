@@ -150,7 +150,6 @@ class DatabaseSeeder extends Seeder
             $quantity = rand(1, 3);
             OrderProductItem::create([
                 'order_id' => $order1->id,
-                'product_id' => $variant->product_id,
                 'product_variant_id' => $variant->id,
                 'quantity' => $quantity,
             ]);

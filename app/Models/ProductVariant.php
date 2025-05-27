@@ -41,5 +41,11 @@ class ProductVariant extends Model
         return $this->hasMany(OrderPackageVariantItem::class);
     }
 
-
+    public function colorImage()
+    {
+        return ProductColorImage::where('product_id', $this->product_id)
+                                ->where('color_id', $this->color_id)
+                                ->first();
+    }
+    
 }

@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('order_product_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('restrict');
-            $table->foreignId('product_id')->constrained()->onDelete('restrict');
-            // $table->foreignId('variant_id')->constrained()->onDelete('restrict');
             $table->integer('quantity')->unsigned();
             $table->timestamps();
         });

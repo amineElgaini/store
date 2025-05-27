@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('order_package_variant_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_package_item_id')->constrained()->onDelete('cascade');
-            $table->foreignId('product_variant_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('order_package_item_id')->constrained()->onDelete('restrict');
+            $table->foreignId('product_variant_id')->constrained()->onDelete('restrict');
             $table->timestamps();
         });
     }

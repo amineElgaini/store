@@ -12,41 +12,73 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'image', 'description', 'price'/* , 'stock' */, 'is_active', 'category_id'];
+    protected $fillable = [
+        'name',
+        'image',
+        'description',
+        'price',
+        'is_active',
+        'category_id'
+    ];
 
+    /**
+     * Category of the product.
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Variants (size + color + stock).
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    /**
+     * Images for each color of the product.
+     */
+    public function colorImages(): HasMany
+    {
+        return $this->hasMany(ProductColorImage::class);
+    }
+
+    /**
+     * Package details this product is part of.
+     */
     public function packageDetails(): HasMany
     {
         return $this->hasMany(PackageDetail::class);
     }
 
+    /**
+     * Order product items referencing this product.
+     */
     public function orderProductItems(): HasMany
     {
         return $this->hasMany(OrderProductItem::class);
     }
 
-    public function productVariants()
+    /**
+     * Unique colors from product variants.
+     */
+    public function colorsUnique()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->variants()
+            ->with('color')
+            ->get()
+            ->pluck('color')
+            ->unique('id')
+            ->values();
     }
 
-    public function colorImages()
+    /**
+     * Total stock across all variants.
+     */
+    public function getTotalStockAttribute(): int
     {
-        return $this->hasMany(ProductColorImage::class);
+        return $this->variants->sum('stock');
     }
-
-        // Helper to get unique colors related to product variants
-        public function colorsUnique()
-        {
-            return $this->productVariants()
-                ->with('color')
-                ->get()
-                ->pluck('color')
-                ->unique('id')
-                ->values();
-        }
 }

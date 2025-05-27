@@ -12,6 +12,7 @@ class CreateProductColorImagesTable extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('color_id')->constrained()->onDelete('cascade');
+            $table->string("image");
             $table->timestamps();
         });
     }

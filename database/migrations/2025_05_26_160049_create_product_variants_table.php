@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('restrict');
             $table->foreignId('size_id')->constrained()->onDelete('restrict');
             $table->foreignId('color_id')->constrained()->onDelete('restrict');
-            // $table->decimal('price', 10, 2); // if price varies by variant
             $table->unsignedInteger('stock')->default(0);
             $table->timestamps();
 
