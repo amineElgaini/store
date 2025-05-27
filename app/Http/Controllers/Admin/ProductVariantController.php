@@ -10,49 +10,44 @@ use App\Models\Color;
 use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ProductVariantController extends Controller
 {
-/*     public function edit(Product $product)
+    public function edit(Product $product)
     {
         $sizes = Size::all();
         $colors = Color::all();
-        $variants = $product->variants()->with(['size', 'color'])->get();
 
-        return view('admin.variants.edit', compact('product', 'sizes', 'colors', 'variants'));
-    } */
-
-    public function edit(Product $product)
-{
-    $sizes = Size::all();
-    $colors = Color::all();
-
-    // Load variants with size and color
-    $variants = $product->variants()->with(['size', 'color'])->get();
-
-    // Load color images for this product, keyed by color_id for easy lookup in view
-    $colorImages = ProductColorImage::where('product_id', $product->id)
-                    ->get()
-                    ->keyBy('color_id');
-
-    return view('admin.variants.edit', compact('product', 'sizes', 'colors', 'variants', 'colorImages'));
-}
-
-   
+        $product->load(['productVariants.color', 'productVariants.size', 'colorImages']);
+        return view('admin.variants.edit', compact('product', 'sizes', 'colors'));
+    }
     
     public function store(Request $request, Product $product)
     {
         $data = $request->validate([
-            'size_id'   => 'required|exists:sizes,id',
-            'color_id'  => 'required|exists:colors,id',
-            'stock'     => 'required|integer|min:0',
-            'image'     => 'nullable|image|max:2048',
+            'size_id' => [
+                'required',
+                'exists:sizes,id',
+            ],
+            'color_id' => [
+                'required',
+                'exists:colors,id',
+                Rule::unique('product_variants')->where(function ($query) use ($product, $request) {
+                    return $query->where('product_id', $product->id)
+                                 ->where('size_id', $request->size_id)
+                                 ->where('color_id', $request->color_id);
+                }),
+            ],
+            'stock' => 'required|integer|min:0',
+            'image' => 'nullable|image|max:2048',
+        ], [
+            'color_id.unique' => 'This variant (color + size) already exists for this product.',
         ]);
     
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('color_images', 'public');
     
-            // Create a new record in product_color_images table (no update)
             ProductColorImage::create([
                 'product_id' => $product->id,
                 'color_id' => $data['color_id'],
@@ -60,8 +55,7 @@ class ProductVariantController extends Controller
             ]);
         }
     
-        // Create the variant
-        $product->variants()->create([
+        $product->productVariants()->create([
             'size_id' => $data['size_id'],
             'color_id' => $data['color_id'],
             'stock' => $data['stock'],
@@ -69,31 +63,42 @@ class ProductVariantController extends Controller
     
         return back()->with('success', 'Variant added successfully.');
     }
-    
 
     public function update(Request $request, ProductVariant $variant)
     {
         $data = $request->validate([
-            'size_id'   => 'required|exists:sizes,id',
-            'color_id'  => 'required|exists:colors,id',
-            'stock'     => 'required|integer|min:0',
-            'image'     => 'nullable|image|max:2048',
+            'size_id' => [
+                'required',
+                'exists:sizes,id',
+            ],
+            'color_id' => [
+                'required',
+                'exists:colors,id',
+                Rule::unique('product_variants')->where(function ($query) use ($request, $variant) {
+                    return $query->where('product_id', $variant->product_id)
+                                 ->where('size_id', $request->size_id)
+                                 ->where('color_id', $request->color_id)
+                                 ->where('id', '!=', $variant->id);
+                }),
+            ],
+            'stock' => 'required|integer|min:0',
+            'image' => 'nullable|image|max:2048',
+        ], [
+            'color_id.unique' => 'This variant (color + size) already exists for this product.',
         ]);
     
-        // Handle image upload for color
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('color_images', 'public');
     
-            // Delete the old image file if it exists
-            $colorImage = ProductColorImage::where('product_id', $variant->product_id)
-                                           ->where('color_id', $data['color_id'])
-                                           ->first();
+            $colorImage = ProductColorImage::firstWhere([
+                ['product_id', $variant->product_id],
+                ['color_id', $data['color_id']],
+            ]);
     
             if ($colorImage && $colorImage->image) {
                 Storage::disk('public')->delete($colorImage->image);
             }
     
-            // Update or create the color image record
             ProductColorImage::updateOrCreate(
                 [
                     'product_id' => $variant->product_id,
@@ -101,13 +106,10 @@ class ProductVariantController extends Controller
                 ],
                 [
                     'image' => $imagePath,
-                    'updated_at' => now(),
-                    'created_at' => now(), // optional; Eloquent handles this if using timestamps
                 ]
             );
         }
     
-        // Update the variant
         $variant->update([
             'size_id' => $data['size_id'],
             'color_id' => $data['color_id'],
@@ -116,13 +118,19 @@ class ProductVariantController extends Controller
     
         return back()->with('success', 'Variant updated successfully.');
     }
-    
 
     public function destroy(ProductVariant $variant)
-    {
-        // No need to delete image here, since it belongs to ProductColorImage and may be shared
-        $variant->delete();
+{
+    $usedInOrderProducts = $variant->orderProductItems()->exists();
+    $usedInOrderPackageVariants = $variant->orderPackageVariantItems()->exists();
 
-        return back()->with('success', 'Variant deleted successfully.');
+    if ($usedInOrderProducts || $usedInOrderPackageVariants) {
+        return back()->with('error', 'Cannot delete variant because it is used in existing orders.');
     }
+
+    $variant->delete();
+
+    return back()->with('success', 'Variant deleted successfully.');
+}
+
 }
