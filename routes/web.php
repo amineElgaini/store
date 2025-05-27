@@ -34,7 +34,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
 
     Route::resource('packages', PackageController::class);
-    Route::resource('orders', OrderController::class);
+    Route::resource('orders', OrderController::class)->only(['index', 'show', 'update', 'destroy']);
 });
 
 Route::get('/dashboard', function () {

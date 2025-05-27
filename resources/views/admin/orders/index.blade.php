@@ -105,8 +105,6 @@
                                 </div>
                             </div>
                         </td>
-                        
-
 
                     </tr>
                 @empty

@@ -22,9 +22,14 @@ class OrderPackageItem extends Model
         return $this->belongsTo(Package::class);
     }
 
-    public function packageVariantItems()
+    public function orderPackageVariantItems()
     {
         return $this->hasMany(OrderPackageVariantItem::class);
+    }
+
+    public function productVariant()
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
 
 }

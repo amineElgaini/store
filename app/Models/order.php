@@ -18,12 +18,12 @@ class order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function productItems(): HasMany
+    public function orderProductItems(): HasMany
     {
         return $this->hasMany(OrderProductItem::class);
     }
 
-    public function packageItems(): HasMany
+    public function orderPackageItems(): HasMany
     {
         return $this->hasMany(OrderPackageItem::class);
     }
