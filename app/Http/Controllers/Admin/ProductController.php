@@ -20,7 +20,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['variants.color', 'variants.size', 'colorImages']);
+        $product->load(['productVariants.color', 'productVariants.size', 'colorImages']);
         return view('admin.products.show', compact('product'));
     }
 

@@ -49,7 +49,7 @@
 
           <h3 class="text-lg font-semibold mb-4">Variants</h3>
 
-          @forelse($product->variants as $variant)
+          @forelse($product->productVariants as $variant)
               <div class="flex justify-between items-center border p-4 mb-3 rounded">
                   <div>
                       <p><strong>Color:</strong> {{ $variant->color->name ?? '-' }}</p>

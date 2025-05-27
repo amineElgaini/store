@@ -27,26 +27,15 @@ Route::get('/', function () {
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class);
-    // Route::resource('products.variants', ProductVariantController::class)
-    // ->shallow()->except(['index', 'create', 'show']);
+
+    Route::get('products/{product}/variants/edit', [ProductVariantController::class, 'edit'])->name('products.variants.edit');
+    Route::post('products/{product}/variants', [ProductVariantController::class, 'store'])->name('products.variants.store');
+    Route::put('variants/{variant}', [ProductVariantController::class, 'update'])->name('variants.update');
+    Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+
     Route::resource('packages', PackageController::class);
     Route::resource('orders', OrderController::class);
 });
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Edit all variants of a product (show variants + create new + edit existing)
-    Route::get('products/{product}/variants/edit', [ProductVariantController::class, 'edit'])->name('products.variants.edit');
-
-    // Store a new variant for a product
-    Route::post('products/{product}/variants', [ProductVariantController::class, 'store'])->name('products.variants.store');
-
-    // Update an existing variant
-    Route::put('variants/{variant}', [ProductVariantController::class, 'update'])->name('variants.update');
-
-    // Delete a variant
-    Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
-});
-
 
 Route::get('/dashboard', function () {
     return view('dashboard');
