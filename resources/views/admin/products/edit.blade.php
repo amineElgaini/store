@@ -12,6 +12,9 @@
                 <a href="{{ route('admin.products.index') }}"
                    class="inline-block text-blue-600 hover:underline text-sm">&larr; Back to Products</a>
             </div>
+
+            <x-flash-messages />
+
             
             <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
                 @csrf
@@ -26,13 +29,16 @@
 
                 <div class="mb-4">
                     <label for="image" class="block font-medium text-sm text-gray-700">Product Image</label>
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="mb-2 w-32 h-32 object-cover rounded-md">
-                    @endif
+                
+                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('storage/products/default.png') }}"
+                         alt="{{ $product->name }}"
+                         class="mb-4 max-w-xs h-auto rounded-md shadow border border-gray-200">
+                
                     <input id="image" name="image" type="file"
                         class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
                         file:rounded-md file:border-0 file:text-sm file:font-semibold
                         file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                
                     @error('image') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 

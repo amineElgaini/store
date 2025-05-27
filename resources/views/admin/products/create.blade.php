@@ -8,6 +8,13 @@
   <div class="py-12 max-w-3xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white shadow-sm sm:rounded-lg p-6">
 
+        <div class="mb-6">
+            <a href="{{ route('admin.products.index') }}"
+               class="inline-block text-blue-600 hover:underline text-sm">&larr; Back to Products</a>
+        </div>
+
+        <x-flash-messages />
+
           <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
               @csrf
 
@@ -41,26 +48,19 @@
                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                       @error('price') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                   </div>
-                  <div>
-                      <label for="stock" class="block font-medium text-sm text-gray-700">Stock</label>
-                      <input id="stock" name="stock" type="number" min="0" value="{{ old('stock') }}" required
-                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                      @error('stock') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-                  </div>
-              </div>
-
-              <div class="mb-6">
-                  <label for="category_id" class="block font-medium text-sm text-gray-700">Category</label>
-                  <select id="category_id" name="category_id" required
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                      <option value="">Select a category</option>
-                      @foreach($categories as $category)
-                          <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                              {{ $category->name }}
-                          </option>
-                      @endforeach
-                  </select>
-                  @error('category_id') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+                  <div class="mb-6">
+                    <label for="category_id" class="block font-medium text-sm text-gray-700">Category</label>
+                    <select id="category_id" name="category_id" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select a category</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('category_id') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+                </div>
               </div>
 
               <div class="flex items-center gap-4">

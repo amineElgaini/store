@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['category', 'variants'])->paginate(10);
+        $products = Product::with(['category', 'productVariants'])->paginate(10);
         return view('admin.products.index', compact('products'));
     }
 
@@ -30,16 +30,13 @@ class ProductController extends Controller
         return view('admin.products.create', compact('categories'));
     }
 
-    // Store new product
     public function store(Request $request)
     {
-        // you need a lock here
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|max:2048',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
         ]);
 
@@ -49,7 +46,7 @@ class ProductController extends Controller
 
         Product::create($validated);
 
-        return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
+        return back()->with('success', 'Product created successfully.');
     }
 
   public function edit(Product $product)
@@ -60,7 +57,6 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        // you need a lock here
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|max:2048',
@@ -71,7 +67,6 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
             }
@@ -80,16 +75,18 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
+        return back()->with('success', 'Product updated successfully.');
     }
 
 
 
     public function destroy(Product $product)
     {
-        // you need to lock product table.
         $usedInPackages = $product->packageDetails()->exists();
-        $orderProductItems = $product->orderProductItems()->exists();
+        $orderProductItems = $product->productVariants()
+        ->whereHas('orderProductItems')
+        ->exists();
+
     
         if ($usedInPackages || $orderProductItems) {
             return redirect()->route('admin.products.index')->withErrors([
@@ -98,13 +95,12 @@ class ProductController extends Controller
         }
     
         $imagePath = $product->image;
-    
         $product->delete();
     
         if ($imagePath) {
             Storage::disk('public')->delete($imagePath);
         }
 
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+        return back()->with('success', 'Product deleted successfully.');
     }
 }

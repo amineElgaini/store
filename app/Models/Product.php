@@ -31,7 +31,7 @@ class Product extends Model
     /**
      * Variants (size + color + stock).
      */
-    public function variants(): HasMany
+    public function productVariants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }
@@ -78,6 +78,6 @@ class Product extends Model
      */
     public function getTotalStockAttribute(): int
     {
-        return $this->variants->sum('stock');
+        return $this->productVariants->sum('stock');
     }
 }
