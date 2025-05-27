@@ -25,7 +25,7 @@ Route::get('/', function () {
 
 
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('categories', CategoryController::class);
+    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class);
     // Route::resource('products.variants', ProductVariantController::class)
     // ->shallow()->except(['index', 'create', 'show']);
