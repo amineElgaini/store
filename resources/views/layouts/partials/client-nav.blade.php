@@ -56,6 +56,20 @@
             </div>
             @endauth
 
+            @guest
+            <!-- Login and Register Buttons -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
+                <a href="{{ route('login') }}"
+                   class="text-sm text-gray-700 underline hover:text-gray-900">
+                    {{ __('Login') }}
+                </a>
+                <a href="{{ route('register') }}"
+                   class="text-sm text-gray-700 underline hover:text-gray-900">
+                    {{ __('Register') }}
+                </a>
+            </div>
+            @endguest
+
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open"
@@ -104,5 +118,18 @@
             </div>
         </div>
         @endauth
+
+        @guest
+        <div class="pt-4 pb-1 border-t border-gray-200">
+            <div class="mt-3 space-y-1 px-4">
+                <x-responsive-nav-link :href="route('login')">
+                    {{ __('Login') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('register')">
+                    {{ __('Register') }}
+                </x-responsive-nav-link>
+            </div>
+        </div>
+        @endguest
     </div>
 </nav>
