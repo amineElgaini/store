@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'admin',
             'username' => 'admin',
             'password' => Hash::make('admin'),
-            'isAdmin'  => true,
+            'is_admin'  => true,
             'address' => '123 Admin Street',
             'phone' => '123-456-7890',
         ]);
@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'user',
             'username' => 'user',
             'password' => Hash::make('user'),
-            'isAdmin'  => false,
+            'is_admin'  => false,
             'address' => '456 User Road',
             'phone' => '987-654-3210',
         ]);        
@@ -133,8 +133,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $admin = User::where('isAdmin', true)->first();
-        $user = User::where('isAdmin', false)->first();
+        $admin = User::where('is_admin', true)->first();
+        $user = User::where('is_admin', false)->first();
 
         // Order 1: product-based
         $order1 = Order::create([

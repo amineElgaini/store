@@ -15,10 +15,10 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->isAdmin) {
+        if (auth()->user()->is_admin) {
             return $next($request);
         }
     
-        abort(403);
+        return redirect('/products');
     }
 }
