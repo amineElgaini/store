@@ -64,8 +64,8 @@
                                 <label for="image_{{ $variant->id }}" class="block text-sm font-medium text-gray-700 mb-1">Current Image</label>
             
                                 @php
-                                    $colorImages = $product->colorImages ?? collect();
-                                    $image = $colorImages->where('color_id', $variant->color_id)->first()->image ?? null;
+                                    $productColorImages = $product->productColorImages ?? collect();
+                                    $image = $productColorImages->where('color_id', $variant->color_id)->first()->image ?? null;
                                 @endphp
             
                                 @if($image)

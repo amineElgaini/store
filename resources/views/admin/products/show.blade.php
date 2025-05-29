@@ -58,7 +58,7 @@
                   </div>
 
                   @php
-                      $colorImage = $product->colorImages
+                      $colorImage = $product->productColorImages
                           ->where('color_id', $variant->color_id)
                           ->first();
                   @endphp

@@ -31,9 +31,9 @@ class DatabaseSeeder extends Seeder
         ]);
         
         User::create([
-            'name' => 'user',
-            'username' => 'user',
-            'password' => Hash::make('user'),
+            'name' => 'client',
+            'username' => 'client',
+            'password' => Hash::make('client'),
             'is_admin'  => false,
             'address' => '456 User Road',
             'phone' => '987-654-3210',
@@ -53,15 +53,24 @@ class DatabaseSeeder extends Seeder
             ['name' => 'M'],
             ['name' => 'L'],
             ['name' => 'XL'],
+            ['name' => 'XXL'],
+            ['name' => 'XXXL'],
         ]);
 
         // Colors
         Color::insert([
-            ['name' => 'White'],
-            ['name' => 'Black'],
-            ['name' => 'Blue'],
-            ['name' => 'Red'],
+            ['name' => 'White / Blanc', 'code' => '#FFFFFF'],
+            ['name' => 'Black / Noir', 'code' => '#000000'],
+            ['name' => 'Blue / Bleu', 'code' => '#0000FF'],
+            ['name' => 'Red / Rouge', 'code' => '#FF0000'],
+            ['name' => 'Green / Vert', 'code' => '#008000'],
+            ['name' => 'Yellow / Jaune', 'code' => '#FFFF00'],
+            ['name' => 'Orange / Orange', 'code' => '#FFA500'],
+            ['name' => 'Purple / Violet', 'code' => '#800080'],
+            ['name' => 'Pink / Rose', 'code' => '#FFC0CB'],
+            ['name' => 'Gray / Gris', 'code' => '#808080'],
         ]);
+        
 
         // Products:
         $tShirtsId = Category::where('name', 'T-Shirts')->first()->id;

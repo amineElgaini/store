@@ -39,7 +39,7 @@ class Product extends Model
     /**
      * Images for each color of the product.
      */
-    public function colorImages(): HasMany
+    public function productColorImages(): HasMany
     {
         return $this->hasMany(ProductColorImage::class);
     }
@@ -58,19 +58,6 @@ class Product extends Model
     public function orderProductItems(): HasMany
     {
         return $this->hasMany(OrderProductItem::class);
-    }
-
-    /**
-     * Unique colors from product variants.
-     */
-    public function colorsUnique()
-    {
-        return $this->variants()
-            ->with('color')
-            ->get()
-            ->pluck('color')
-            ->unique('id')
-            ->values();
     }
 
     /**

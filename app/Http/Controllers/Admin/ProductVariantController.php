@@ -19,7 +19,7 @@ class ProductVariantController extends Controller
         $sizes = Size::all();
         $colors = Color::all();
 
-        $product->load(['productVariants.color', 'productVariants.size', 'colorImages']);
+        $product->load(['productVariants.color', 'productVariants.size', 'productColorImages']);
         return view('admin.variants.edit', compact('product', 'sizes', 'colors'));
     }
     
