@@ -15,7 +15,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
             @if(auth()->check() && auth()->user()->is_admin)
                 @include('layouts.partials.admin-nav')
             @else

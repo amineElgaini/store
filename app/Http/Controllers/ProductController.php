@@ -9,35 +9,29 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // public function index()
-    // {
-    //     $products = Product::with([
-    //         'category',
-    //         'productVariants.size',
-    //         'productVariants.color',
-    //         'productColorImages'
-    //     ])
-    //     ->where('is_active', true)
-    //     ->get();
-
-    //     return view('products.index', compact('products'));
-    // }
-
-public function index(Request $request)
-{
-    $query = Product::query();
-
-    if ($request->filled('category')) {
-        $query->where('category_id', $request->category);
+    
+    public function index(Request $request)
+    {
+        $max = $request->input('max_price');
+        $selectedCategories = $request->input('categories', []);
+    
+        $products = Product::query()
+            ->when(!empty($max), fn ($query) => $query->where('price', '<=', $max))
+            ->when(!empty($selectedCategories), fn ($query) =>
+                $query->whereIn('category_id', $selectedCategories)
+            )
+            ->paginate(12);
+    
+        $allCategories = Category::all();
+    
+        return view('products.index', [
+            'products' => $products,
+            'max' => $max,
+            'allCategories' => $allCategories,
+            'selectedCategories' => $selectedCategories,
+        ]);
     }
-
-    $products = $query->get();
-    $categories = Category::all();
-
-    return view('products.index', compact('products', 'categories'));
-}
-
-
+      
     public function show(Product $product)
     {
         $product->load(['productVariants.size', 'productVariants.color', 'productColorImages.color']);
