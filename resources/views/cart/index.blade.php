@@ -1,9 +1,16 @@
 <x-app-layout>
+    @if(session('restore_checkout'))
+        <div class="p-4 mb-4 text-sm text-yellow-700 bg-yellow-100 rounded">
+            You were redirected back after login. Please confirm your order.
+        </div>
+    @endif
     <div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <div class="mb-4 sm:mb-6">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
             <p class="text-sm sm:text-base text-gray-600">{{ $cartItems->count() }} items in your cart</p>
         </div>
+
+        <x-flash-messages />
 
         @if($cartItems->isEmpty())
             <div class="text-center py-8 sm:py-12">
@@ -62,23 +69,25 @@
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded shadow sticky top-20 sm:top-24 p-4 sm:p-6">
                         <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
-
+                        @php
+                            $checkoutData = session('checkout_form', []);
+                        @endphp
                         <form method="POST" action="{{ route('orders.store') }}">
                             @csrf
 
                             <div class="mb-3">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                <input name="name" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">
+                                <input name="name" value="{{ old('name', $checkoutData['name'] ?? '') }}" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">
                             </div>
 
                             <div class="mb-3">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                                <textarea name="address" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300"></textarea>
+                                <textarea name="address"  required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">{{ old('address', $checkoutData['address'] ?? '') }}</textarea>
                             </div>
 
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input name="phone" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">
+                                <input name="phone" value="{{ old('phone', $checkoutData['phone'] ?? '') }}" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">
                             </div>
 
                             <div class="border-t pt-3 mb-4">

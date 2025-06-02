@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('restrict');
             $table->integer('quantity')->unsigned();
+            $table->decimal('price', 8, 2)->unsigned();
             $table->timestamps();
         });
     }

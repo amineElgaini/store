@@ -7,35 +7,51 @@
   
     <div class="py-12 max-w-5xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded-lg p-8">
-            <div class="mb-6 border-b pb-4">
-                <h3 class="text-2xl font-bold text-gray-900">Order #{{ $order->id }}</h3>
-                <p class="text-sm text-gray-500">Placed on {{ $order->created_at->format('F j, Y, g:i A') }}</p>
+
+        @php
+            $shipping = json_decode($order->shipping_info, true) ?? [];
+        @endphp
+        
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <p class="text-gray-700">
+                    <span class="font-medium">User:</span>
+                    {{ $order->user->name ?? 'N/A' }}
+                </p>
+                <p class="text-gray-700 mt-2">
+                    <span class="font-medium">Status:</span>
+                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full
+                        @if($order->status === 'pending') bg-yellow-100 text-yellow-800
+                        @elseif($order->status === 'completed') bg-green-100 text-green-800
+                        @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                        @endif">
+                        {{ ucfirst($order->status) }}
+                    </span>
+                </p>
+        
+                {{-- Display shipping info --}}
+                <p class="text-gray-700 mt-4">
+                    <span class="font-medium">Name:</span> {{ $shipping['name'] ?? 'N/A' }}
+                </p>
+                <p class="text-gray-700 mt-1">
+                    <span class="font-medium">Address:</span> {{ $shipping['address'] ?? 'N/A' }}
+                </p>
+                <p class="text-gray-700 mt-1">
+                    <span class="font-medium">Phone:</span> {{ $shipping['phone'] ?? 'N/A' }}
+                </p>
             </div>
-  
-            <div class="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <p class="text-gray-700">
-                        <span class="font-medium">User:</span>
-                        {{ $order->user->name ?? 'N/A' }}
-                    </p>
-                    <p class="text-gray-700 mt-2">
-                        <span class="font-medium">Status:</span>
-                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full
-                            @if($order->status === 'pending') bg-yellow-100 text-yellow-800
-                            @elseif($order->status === 'completed') bg-green-100 text-green-800
-                            @elseif($order->status === 'cancelled') bg-red-100 text-red-800
-                            @endif">
-                            {{ ucfirst($order->status) }}
-                        </span>
-                    </p>
-                </div>
-                <div>
-                    <p class="text-gray-700">
-                        <span class="font-medium">Total Price:</span>
-                        <span class="text-indigo-600 font-bold">{{ number_format($order->total_price, 2) }} DH</span>
-                    </p>
-                </div>
+        
+            <div>
+                <p class="text-gray-700">
+                    <span class="font-medium">Total Price:</span>
+                    <span class="text-indigo-600 font-bold">{{ number_format($order->total_price, 2) }} DH</span>
+                </p>
             </div>
+        </div>
+        
+
+
+
   
             <hr class="my-6">
   
@@ -57,9 +73,9 @@
                                          alt="{{ $product->name }}"
                                          class="w-16 h-16 object-cover rounded border">
                                 @else
-                                    <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded text-sm text-gray-500">
-                                        N/A
-                                    </div>
+                                <img src="{{ asset('images/default-product-image.png') }}"
+                                alt="{{ $product->name }}"
+                                class="w-16 h-16 object-cover rounded border">
                                 @endif
   
                                 <div>
@@ -95,9 +111,9 @@
                                              alt="{{ $package->name }}"
                                              class="w-16 h-16 object-cover rounded border">
                                     @else
-                                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded text-sm text-gray-500">
-                                            N/A
-                                        </div>
+                                        <img src="{{ asset('images/default-product-image.png') }}"
+                                        alt="{{ $package->name }}"
+                                        class="w-16 h-16 object-cover rounded border">
                                     @endif
   
                                     <div>

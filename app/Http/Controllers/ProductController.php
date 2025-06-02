@@ -28,13 +28,12 @@ class ProductController extends Controller
             'max' => $request->max_price,
         ]);
     }
-    
         
     public function show(Product $product)
     {
         $product->load(['productVariants.size', 'productVariants.color', 'productColorImages.color']);
     
-        $colors = $product->productColorImages->pluck('color')->values();
+        $colors = $product->productVariants->pluck('color')->unique('id')->values();
         $sizes = Size::all();
         return view('products.show', compact('sizes', 'product', 'colors'));
     }

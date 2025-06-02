@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\order;
+use App\Models\OrderProductItem;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,54 +16,72 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
-
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'address' => 'required|string|max:1000',
-        'phone' => 'required|string|max:20',
-        'total_price' => 'required|numeric|min:0',
-    ]);
-
-    $cart = session()->get('cart', []);
-    if (empty($cart)) {
-        return back()->withErrors('Your cart is empty.');
-    }
-
-    $user = auth()->user();
-
-    // Optional: Update user contact info
-    $user->update([
-        'name' => $request->name,
-        'address' => $request->address,
-        'phone' => $request->phone,
-    ]);
-
-    DB::transaction(function () use ($cart, $request, $user) {
-        $order = \App\Models\Order::create([
-            'user_id' => $user->id,
-            'total_price' => $request->total_price,
-            'status' => 'pending',
-        ]);
-
-        foreach ($cart as $item) {
-            \App\Models\OrderProductItem::create([
-                'order_id' => $order->id,
-                'product_variant_id' => $item['variant_id'],
-                'quantity' => $item['quantity'],
-            ]);
-
-            // Optional: Decrease stock
-            $variant = \App\Models\ProductVariant::find($item['variant_id']);
-            $variant->decrement('stock', $item['quantity']);
+    {
+        if (!auth()->check()) {
+            // Save input data to session
+            session()->put('checkout_form', $request->only(['name', 'address', 'phone']));
+            // Redirect to login with intended set
+            return redirect()->guest(route('login'));
         }
-    });
-
-    session()->forget('cart');
-
-    return redirect()->route('orders.index')->with('success', 'Order placed successfully.');
-}
+    
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:1000',
+            'phone' => 'required|string|max:20',
+        ]);
+    
+        $cart = session()->get('cart', []);
+        if (empty($cart)) {
+            return back()->withErrors('Your cart is empty.');
+        }
+    
+        // Calculate total price from DB
+        $totalPrice = 0;
+        foreach ($cart as $item) {
+            $variant = ProductVariant::with('product')->find($item['variant_id']);
+            if (!$variant->product()) {
+                return back()->withErrors('One of the products in your cart is not available.');
+            }
+            $totalPrice += $variant->product->price * $item['quantity'];
+        }
+    
+        $user = auth()->user();
+    
+        DB::transaction(function () use ($cart, $request, $user, $totalPrice) {
+            $shippingInfo = json_encode([
+                'name' => $request->name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+            ]);
+    
+            $order = Order::create([
+                'user_id' => $user->id,
+                'total_price' => $totalPrice,
+                'status' => 'pending',
+                'shipping_info' => $shippingInfo,
+            ]);
+    
+            foreach ($cart as $item) {
+                $variant = ProductVariant::find($item['variant_id']);
+    
+                OrderProductItem::create([
+                    'order_id' => $order->id,
+                    'product_variant_id' => $variant->id,
+                    'quantity' => $item['quantity'],
+                    'price' => $variant->price, // <-- Add this price field here
+                ]);
+    
+                // Optional: Decrease stock
+                $variant->decrement('stock', $item['quantity']);
+            }
+        });
+    
+        session()->forget('cart');
+        session()->forget('checkout_form');
+    
+        return redirect()->route('cart.index')->with('success', 'Order placed successfully.');
+    }
 
     public function show(Order $order)
     {
@@ -77,77 +97,6 @@ class OrderController extends Controller
     {
         return view('admin.orders.edit', compact('order'));
     }
-
-    /* public function update(Request $request, Order $order)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,completed,cancelled',
-        ]);
-
-        $newStatus = $request->status;
-        $oldStatus = $order->status;
-
-        if ($newStatus === $oldStatus) {
-            return back()->with('info', 'Order status is already ' . $newStatus);
-        }
-
-        $order->load('orderProductItems.productVariant', 'orderPackageItems.orderPackageVariantItems.productVariant');
-
-        // DB::beginTransaction();
-
-        try {
-            if ($oldStatus === 'cancelled') {
-                // Validate stock availability
-                foreach ($order->productItems as $productItem) {
-                    if ($productItem->product->stock < $productItem->quantity) {
-                        throw new \Exception("Not enough stock for product {$productItem->product->name}.");
-                    }
-                }
-
-                foreach ($order->packageItems as $packageItem) {
-                    foreach ($packageItem->package->packageDetails as $detail) {
-                        $required = $packageItem->quantity * $detail->quantity;
-                        if ($detail->product->stock < $required) {
-                            throw new \Exception("Not enough stock for package product {$detail->product->name}.");
-                        }
-                    }
-                }
-
-                // Deduct stock
-                foreach ($order->productItems as $productItem) {
-                    $productItem->product->decrement('stock', $productItem->quantity);
-                }
-
-                foreach ($order->packageItems as $packageItem) {
-                    foreach ($packageItem->package->packageDetails as $detail) {
-                        $detail->product->decrement('stock', $packageItem->quantity * $detail->quantity);
-                    }
-                }
-            }
-
-            if ($newStatus === 'cancelled') {
-                foreach ($order->productItems as $productItem) {
-                    $productItem->product->increment('stock', $productItem->quantity);
-                }
-
-                foreach ($order->packageItems as $packageItem) {
-                    foreach ($packageItem->package->packageDetails as $detail) {
-                        $detail->product->increment('stock', $packageItem->quantity * $detail->quantity);
-                    }
-                }
-            }
-
-            $order->update(['status' => $newStatus]);
-
-            // DB::commit();
-
-            return back()->with('success', "Order #{$order->id} status updated to {$newStatus}.");
-        } catch (\Exception $e) {
-            // DB::rollBack();
-            return back()->withErrors('An error occurred while updating the order: ' . $e->getMessage());
-        }
-    } */
-
 
     public function update(Request $request, Order $order)
 {

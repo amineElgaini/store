@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-flash-messages/>
+    <x-flash-messages />
     <div class="py-12 px-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" x-data="productDetail()"  x-init="selectedImage = images[0]">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 items-start justify-center">
