@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProductColorImage;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
@@ -15,12 +16,16 @@ class CartController extends Controller
         $cartItems = collect($cart)->map(function ($item) {
             $variant = ProductVariant::with(['product', 'color', 'size'])
                 ->find($item['variant_id']);
-        
+    
             if (!$variant) return null;
-        
-            // Now we fetch the color image based on product_id and color_id
-            $image = $variant->colorImage()->image;
-        
+    
+            // Get the image using product_id and color_id from variant
+            $image = optional(
+                ProductColorImage::where('product_id', $variant->product_id)
+                    ->where('color_id', $variant->color_id)
+                    ->first()
+            )->image;
+    
             return [
                 'id' => $variant->id,
                 'title' => $variant->product->name,
@@ -33,17 +38,19 @@ class CartController extends Controller
                 'quantity' => $item['quantity'],
             ];
         })->filter()->values();
-        
     
-        $subtotal = $cartItems->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-        
+        $subtotal = $cartItems->sum(fn($item) => $item['price'] * $item['quantity']);
+        $cartCount = $cartItems->sum(fn($item) => $item['quantity']);
+    
+        session(['cart_count' => $cartCount]);
+    
         return view('cart.index', [
             'cartItems' => $cartItems,
             'subtotal' => $subtotal,
         ]);
     }
+    
+    
 
     public function addProduct(Request $request, ProductVariant $variant)
     {
@@ -81,7 +88,9 @@ class CartController extends Controller
         }
     
         session()->put('cart', $cart);
-    
+        $cartCount = collect($cart)->sum('quantity');
+        session(['cart_count' => $cartCount]);
+
         return back()->with('success', 'Product added to cart!');
     }
 
@@ -90,6 +99,8 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $cart = array_filter($cart, fn($item) => $item['variant_id'] != $variantId);
         session()->put('cart', $cart);
+        $cartCount = collect($cart)->sum('quantity');
+        session(['cart_count' => $cartCount]);
         return redirect()->route('cart.index')->with('success', 'Item removed.');
     }
 

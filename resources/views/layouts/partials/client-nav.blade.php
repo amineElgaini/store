@@ -33,6 +33,7 @@
             </span>
           @endif
         </a>
+        
 
         {{-- Authenticated --}}
         @auth
