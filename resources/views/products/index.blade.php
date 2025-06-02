@@ -53,7 +53,7 @@
                                
                                 {{-- Image Container (1:1 aspect ratio) --}}
                                 <div class="relative w-full aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                                    <img src="{{ $product->image ?? 'images/default-product-image.png' }}"
+                                    <img src="{{ $product->image ? 'storage/'.$product->image : 'images/default-product-image.png' }}"
                                          alt="{{ $product->name }}"
                                          class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
