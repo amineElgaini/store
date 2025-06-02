@@ -6,47 +6,36 @@ use App\Models\Category;
 use App\Models\Color;
 use App\Models\Size;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
     
     public function index(Request $request)
     {
-        $max = $request->input('max_price');
-        $selectedCategories = $request->input('categories', []);
-    
-        $products = Product::query()
-            ->when(!empty($max), fn ($query) => $query->where('price', '<=', $max))
-            ->when(!empty($selectedCategories), fn ($query) =>
-                $query->whereIn('category_id', $selectedCategories)
-            )
+        $products = Product::with('category')
+            ->when($request->filled('min_price'), fn($q) => $q->where('price', '>=', $request->min_price))
+            ->when($request->filled('max_price'), fn($q) => $q->where('price', '<=', $request->max_price))
+            ->when($request->filled('categories'), fn($q) => $q->whereIn('category_id', $request->categories))
             ->paginate(12);
-    
-        $allCategories = Category::all();
+        $categories = Cache::remember('all_categories', now()->addHour(), fn() => Category::all());
     
         return view('products.index', [
             'products' => $products,
-            'max' => $max,
-            'allCategories' => $allCategories,
-            'selectedCategories' => $selectedCategories,
+            'allCategories' => $categories,
+            'selectedCategories' => $request->categories ?? [],
+            'min' => $request->min_price,
+            'max' => $request->max_price,
         ]);
     }
-      
+    
+        
     public function show(Product $product)
     {
         $product->load(['productVariants.size', 'productVariants.color', 'productColorImages.color']);
     
         $colors = $product->productColorImages->pluck('color')->values();
-    
-        // Map variants grouped by color name, listing sizes & stock
-        $variantsByColor = $product->productVariants->groupBy(fn($variant) => $variant->color->name)
-            ->map(fn($variants) => $variants->map(fn($v) => [
-                'size' => $v->size->name,
-                'stock' => $v->stock,
-            ]));
-            
         $sizes = Size::all();
-
-        return view('products.show', compact('sizes', 'product', 'colors', 'variantsByColor'));
+        return view('products.show', compact('sizes', 'product', 'colors'));
     }
 }

@@ -14,6 +14,55 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
+
+    public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'address' => 'required|string|max:1000',
+        'phone' => 'required|string|max:20',
+        'total_price' => 'required|numeric|min:0',
+    ]);
+
+    $cart = session()->get('cart', []);
+    if (empty($cart)) {
+        return back()->withErrors('Your cart is empty.');
+    }
+
+    $user = auth()->user();
+
+    // Optional: Update user contact info
+    $user->update([
+        'name' => $request->name,
+        'address' => $request->address,
+        'phone' => $request->phone,
+    ]);
+
+    DB::transaction(function () use ($cart, $request, $user) {
+        $order = \App\Models\Order::create([
+            'user_id' => $user->id,
+            'total_price' => $request->total_price,
+            'status' => 'pending',
+        ]);
+
+        foreach ($cart as $item) {
+            \App\Models\OrderProductItem::create([
+                'order_id' => $order->id,
+                'product_variant_id' => $item['variant_id'],
+                'quantity' => $item['quantity'],
+            ]);
+
+            // Optional: Decrease stock
+            $variant = \App\Models\ProductVariant::find($item['variant_id']);
+            $variant->decrement('stock', $item['quantity']);
+        }
+    });
+
+    session()->forget('cart');
+
+    return redirect()->route('orders.index')->with('success', 'Order placed successfully.');
+}
+
     public function show(Order $order)
     {
         $order->load([

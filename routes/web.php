@@ -29,12 +29,10 @@ Route::get('/', function () {
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
+Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add-product', [CartController::class, 'addProduct'])->name('cart.addProduct');
-Route::post('/cart/add-package', [CartController::class, 'addPackage'])->name('cart.addPackage');
-Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
-Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-
+Route::post('/cart/add-product/{variant}', [CartController::class, 'addProduct'])->name('cart.addProduct');
+Route::delete('/cart/remove-product/{variant}', [CartController::class, 'removeProduct'])->name('cart.removeProduct');
 
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
