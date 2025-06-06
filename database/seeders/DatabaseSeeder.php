@@ -160,6 +160,7 @@ class DatabaseSeeder extends Seeder
             OrderProductItem::create([
                 'order_id' => $order1->id,
                 'product_variant_id' => $variant->id,
+                'price' => 0,
                 'quantity' => $quantity,
             ]);
             $total += $variant->product->price * $quantity;
