@@ -1,66 +1,175 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel E‑Commerce Project
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based e‑commerce application with an **admin dashboard**, **product & package management**, **shopping cart**, and **order system**. The frontend uses **Blade**, **Tailwind CSS**, and **Alpine.js** for lightweight interactivity without a full SPA.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Public / Customer Side
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* Home page
+* Product listing and product details
+* Product variants support
+* Shopping cart (add / remove products)
+* Place orders as a customer
 
-## Learning Laravel
+### Admin Dashboard
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* Secure admin area (`auth` + `isAdmin` middleware)
+* Dashboard overview
+* Category management
+* Product management
+* Product variant management
+* Package management
+* Order management (view, update, delete)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Backend:** Laravel
+* **Frontend:** Blade, Tailwind CSS, Alpine.js
+* **Database:** MySQL
+* **Authentication:** Sunctum
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📁 Project Structure (Important Parts)
 
-### Premium Partners
+```
+app/
+ └── Http/Controllers/
+     ├── Admin/
+     │   ├── DashboardController.php
+     │   ├── CategoryController.php
+     │   ├── ProductController.php
+     │   ├── ProductVariantController.php
+     │   └── PackageController.php
+     ├── CartController.php
+     ├── OrderController.php
+     └── ProductController.php
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+resources/views/
+ ├── admin/
+ ├── products/
+ ├── cart/
+ └── layouts/
+```
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Installation & Setup
 
-## Code of Conduct
+### 1. Clone the repository
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone https://github.com/amineElgaini/store.git
+cd store
+```
 
-## Security Vulnerabilities
+### 2. Install dependencies
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer install
+npm install
+npm run build
+```
 
-## License
+### 3. Environment configuration
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Update `.env` with your database credentials.
+
+### 4. Run migrations
+
+```bash
+php artisan migrate --seed
+```
+
+### 5. Start the server
+
+```bash
+php artisan serve
+```
+
+---
+
+## 🔐 Authentication & Admin Access
+
+* Authentication routes are provided via `auth.php`
+* Admin routes are protected using:
+
+  * `auth` middleware
+  * custom `isAdmin` middleware
+
+```php
+Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    // admin routes
+});
+```
+
+---
+
+## 🛣️ Routes Overview
+
+### Public Routes
+
+| Method | URI                            | Description              |
+| ------ | ------------------------------ | ------------------------ |
+| GET    | /                              | Home page                |
+| GET    | /products                      | Product list             |
+| GET    | /products/{product}            | Product details          |
+| GET    | /cart                          | View cart                |
+| POST   | /cart/add-product/{variant}    | Add product to cart      |
+| DELETE | /cart/remove-product/{variant} | Remove product from cart |
+| POST   | /orders                        | Place order              |
+
+### Admin Routes
+
+| Method   | URI                                     | Description       |
+| -------- | --------------------------------------- | ----------------- |
+| GET      | /admin/dashboard                        | Admin dashboard   |
+| Resource | /admin/categories                       | Manage categories |
+| Resource | /admin/products                         | Manage products   |
+| GET      | /admin/products/{product}/variants/edit | Edit variants     |
+| POST     | /admin/products/{product}/variants      | Store variants    |
+| PUT      | /admin/variants/{variant}               | Update variant    |
+| DELETE   | /admin/variants/{variant}               | Delete variant    |
+| Resource | /admin/packages                         | Manage packages   |
+| Resource | /admin/orders                           | Manage orders     |
+
+---
+
+## ⚡ Alpine.js Usage
+
+Alpine.js is used to add interactivity without React or Vue.
+
+Examples of usage:
+
+* Variant selection on product pages
+* Dynamic cart updates
+* Toggle modals and dropdowns in admin UI
+
+Example:
+
+```html
+<div x-data="{ open: false }">
+    <button @click="open = !open">Toggle</button>
+
+    <div x-show="open" class="mt-2">
+        Content here
+    </div>
+</div>
+```
+
+---
+
+## 🛒 Cart & Orders
+
+* Cart data is stored in the **session**
+* Supports product variants
+* Orders are created from session data
+* Admin can manage and update order status
